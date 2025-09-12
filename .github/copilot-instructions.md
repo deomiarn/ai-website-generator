@@ -1,34 +1,119 @@
-# Repository Instructions – Relume Clone (Website-Generator)
+> Read me first. These instructions are sent with every Copilot Agent request. They are short, task‑agnostic, and describe how to work efficiently in this repo. Trust these instructions and only search the codebase if information here is missing or proven wrong.
+>
 
-## Mission
-Baue eine App wie **relume.io**. Arbeit erfolgt **screen‑weise** anhand von Screenshots (du bekommst die Bilder im Prompt). **Immer echtes CRUD mit DB** (Prisma + Route Handlers), **keine Stubs**. Pixelgenauigkeit ±5 % bei 1440/920/420.
+## 1) What this repository does (high‑level)
 
-## Master Prompt (eingebettet)
-- **Stack:** Next.js App Router + TypeScript + ESLint/Prettier + **Tailwind v4** (zero‑config).
-- **UI‑Policy:** **shadcn/ui zuerst** (Button, Card, Dialog, Input, Label, Textarea, Select, Tabs, Tooltip, Toast, Breadcrumb, Table). Nur wenn nicht vorhanden → Tailwind.
-- **State/Data:** **TanStack Query v5** (Query/Mutation + Optimistic Updates).
-- **Forms/Validation:** **react-hook-form** + **zod** (+ `@hookform/resolvers/zod`).
-- **Auth:** **Auth.js (next-auth v5)** mit Prisma‑Adapter.
-- **DB:** Prisma (SQLite dev).
-- **AI:** **OpenAI** über **Vercel AI SDK** (`ai` + `@ai-sdk/openai`).
-- **Images:** `next/image` + `uploadthing` + `sharp` Varianten; `alt` Pflicht.
-- **SEO:** `generateMetadata`, `app/sitemap.ts`, `app/robots.ts`, OG‑Images.
-- **Exporter:** erzeugt ein Next.js‑Projekt (Zip); Header/Footer global dedupliziert.
-- **Styling‑Baseline:** `.container-1440.pad-responsive` überall. Breakpoints **420/920/1440**. Sidebar‑Layouts mit `.with-sidebar` (Sidebar 280px; Content‑Abstand = `pad-responsive`). **Fonts/Radius/Brand‑Tokens** via `globals.css` (`@theme`).
-- **Qualität:** `strict: true`, **kein `any`** außer im Fehlerpfad (`catch (err: any)`). **Hohe Kohäsion**, **Single Responsibility**, **keine God‑Components**. Komponenten **page‑lokal**; global nur Header/Footer.
+A **Relume‑style website generator** built on **Next.js (App Router)**. Users create projects, generate AI‑assisted **Sitemaps** and **Wireframes**, choose section **variants**, adjust **design tokens**, and **export** a production‑ready Next.js site. The app uses genuine CRUD with a SQL database via **Prisma**, strict **TypeScript**, **Tailwind v4** (zero‑config), **shadcn/ui** components, and **Vercel AI SDK** with **OpenAI**.
 
-## Regeln & Erwartungen
-1. **Ein Prompt = ein Screen** (**UI + echte Daten**). Keine Abhängigkeiten zu späteren Prompts. Wenn Daten fehlen, **erzeuge DB‑Schema, Migration, CRUD‑API** innerhalb dieses Prompts.
-2. **Files to touch** werden im Prompt angegeben; **nur** diese anfassen.
-3. **DB‑Fluss** (Standard): Prisma Schema ▶ `prisma migrate dev` ▶ Route Handlers (`app/api/.../route.ts`) ▶ TanStack Query (GET/LIST) + Mutations (POST/PATCH/DELETE) **mit Optimistic Updates** + `invalidateQueries`.
-4. **Zod** für jede Eingabe (API & Form). Fehler pattern: `catch (err: any) { toast.error(message) }`.
-5. **UI‑Konventionen:** `.container-1440.pad-responsive` um *jede* Page/Section. Drei Spalten ab 1440, zwei ab 920, eine bis 420 (wenn relevant). Sidebar‑Layouts nutzen `.with-sidebar`.
-6. **Akzeptanz:** Typecheck/Build ok, Pixel‑Nähe ±5 %, responsiv (420/920/1440), keine Hydration‑Warnings, CRUD funktioniert (create/read/update/delete) inkl. Dialogen & Toaster.
+**Project type & tech:** Full‑stack web app. Languages: TypeScript/TSX, SQL (Prisma). Frameworks: Next.js (>=14 App Router), Tailwind v4, shadcn/ui, TanStack Query, react‑hook‑form + zod, NextAuth (Auth.js), UploadThing + sharp, Vercel AI SDK (OpenAI). Target runtime: Node.js ≥ 20 (LTS).
 
-## Folder‑Guides
-- Screens: `app/(auth)/**`, `app/(app)/**` – jeweils **lokale** `components/`.
-- Sections‑Library: `src/sections/<kind>/<variant>/index.tsx`, Registry für `kind`+`variant`.
-- Keine cross‑page UI‑Shareds ohne ausdrückliche Aufforderung.
+## 2) Build & validation — exact commands
 
-## Prompt‑Kontrakt
-Jeder Prompt liefert **komplette Umsetzung** des benannten Screens: **UI, Prisma‑Schema (falls nötig), Migrations, API‑Routes, Queries/Mutations, Zod‑Schemas, Toaster‑Feedback, a11y**. Zusätzlich **Liste der angefassten Dateien** + **kurze Begründung** je Datei.
+> Always: use pnpm; ensure Node ≥ 20; copy envs; run Prisma commands before first build.
+>
+
+**Bootstrap (fresh clone):**
+
+```
+pnpm install
+cp .env.example .env   # then fill required secrets (see below)
+pnpx prisma generate
+pnpx prisma migrate dev --name init
+pnpm run dev           # verify boots locally
+```
+
+**Build (CI‑safe):**
+
+```
+pnpm run typecheck
+pnpm run lint
+pnpm run build
+```
+
+**Run (local):** `pnpm run dev` ⇒ http://localhost:3000
+
+**Tests:** If test suite is present: `pnpm run test`. (If missing, agent should add minimal smoke tests only when requested.)
+
+**Lint/Format:** `pnpm run lint` / `pnpm run format` (if defined). Treat lint warnings that affect runtime as failures.
+
+**Common pitfalls & fixes:**
+
+- **Prisma schema changed** → run `pnpx prisma generate` then `pnpx prisma migrate dev`.
+- **Missing envs** → check `.env.example` and section **3) Environment** below.
+- **Hydration warnings** → do not put `"use client"` in `app/layout.tsx`; co‑locate client components under page components.
+- **Tailwind v4** requires `@import "tailwindcss";` and tokens in `styles/globals.css` (no `tailwind.config.ts`).
+
+> When a command ordering matters, use the sequence above (install → prisma generate → migrate → typecheck → lint → build). If a step fails, do not continue; fix and re‑run from the failing step.
+>
+
+## 3) Environment & secrets (required)
+
+Create `.env` from `.env.example` and set at minimum:
+
+```
+DATABASE_URL= file:./dev.db            # SQLite dev (or Postgres URL in prod)
+NEXTAUTH_SECRET= <generated>
+OPENAI_API_KEY= <your key>
+UPLOADTHING_SECRET= <...>
+UPLOADTHING_APP_ID= <...>
+# Optional: RESEND_API_KEY, STRIPE_SECRET_KEY, CALCOM_ORIGIN, etc.
+```
+
+**Always** validate `.env` presence before running Prisma or the dev server.
+
+## 4) Project layout & where things live
+
+```
+/               package.json, README.md, .env.example
+/app            Next.js App Router pages & layouts
+  /(auth)       Auth screens (login, etc.) with local /components
+  /(app)        App screens (dashboard, projects, wireframes, settings)
+  /api          Route Handlers (CRUD, AI, export, uploads)
+/prisma         schema.prisma, migrations/
+/src
+  /sections     Predefined section variants (kind/variant/index.tsx) + registry
+  /lib          Helpers (seo, validations, utils)
+/styles         globals.css (Tailwind v4 + tokens, breakpoints, utilities)
+/.github
+  /workflows    CI pipelines (lint, typecheck, build, test if present)
+```
+
+**Key configs:** TypeScript `tsconfig.json` (strict), ESLint `.eslintrc*`, Tailwind via `styles/globals.css` (no tailwind config file), Prisma `prisma/schema.prisma`.
+
+**Styling baseline (used everywhere):**
+
+- Wrap content with `.container-1440 pad-responsive`.
+- Breakpoints: 420px / 920px / 1440px.
+- Sidebar layouts: `.with-sidebar` (sidebar 280px; content respects `pad-responsive`).
+- Design tokens defined in `styles/globals.css` under `@theme inline` (colors, radius, fonts).
+
+## 5) Coding standards & conventions
+
+- **TypeScript strict**; prefer precise types; `any` **only** in `catch (err: any)` error paths.
+- **shadcn/ui first**, Tailwind utilities only to glue.
+- **High cohesion & Single Responsibility:** co‑locate component files within the screen; avoid cross‑page "god components". Mark explicit globals (Header/Footer) only.
+- **Forms** use `react-hook-form` + `zod` with resolvers, a11y labels, and `aria-live` for errors.
+- **Data** via **TanStack Query v5** (queries + mutations with optimistic updates and invalidation).
+- **AI** via **Vercel AI SDK** (`ai` + `@ai-sdk/openai`).
+- **Images** via `next/image`; uploads via UploadThing; variants via `sharp`.
+- **SEO** via `generateMetadata`, `app/sitemap.ts`, `app/robots.ts`, OG images.
+
+## 6) CI & validation expectations
+
+- A CI workflow (if present) should run, at minimum: `pnpm install`, `pnpm run typecheck`, `pnpm run lint`, `pnpm run build`, and tests.
+- Agents should **mimic CI locally** using the sequence in **2)** before creating PRs.
+- PRs must not introduce hydration warnings, type errors, or failing migrations.
+
+## 7) Quick facts to reduce searching
+
+- **Entry points:** `app/layout.tsx` (imports `styles/globals.css`), page routes under `app/*/page.tsx`.
+- **APIs:** add/modify route handlers under `app/api/**/route.ts`.
+- **Database:** edit `prisma/schema.prisma`, then `pnpx prisma generate` + `pnpx prisma migrate dev`.
+- **Section variants:** add new component under `src/sections/<kind>/<variant>/index.tsx` and map in `src/sections/registry.ts`.
+- **Common scripts** (expected in `package.json`): `dev`, `build`, `typecheck`, `lint`, `db:push|migrate|seed`.
+
+## 8) Final guidance to the agent
+
+- **Follow this file verbatim.** Only run repository‑wide searches if these instructions are incomplete or produce errors.
+- Prefer **small, compiling changes** with clear commit messages over large refactors.
+- If a command fails, document the failure in the PR description and include the exact fix you applied.
