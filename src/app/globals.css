@@ -158,3 +158,20 @@
 .with-sidebar > .content {
     padding-inline: inherit;
 }
+
+/* App Shell for tool screens (fluid, no 1440 cap) */
+.app-shell {
+    padding: 16px;
+}
+
+@media (min-width: 920px) {
+    .app-shell {
+        padding: 24px;
+    }
+}
+
+@media (min-width: 1440px) {
+    .app-shell {
+        padding: 32px;
+    }
+}

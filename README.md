@@ -21,7 +21,7 @@ Export (Next.js).
 ## Tech Stack
 
 Next.js (App Router) • TypeScript (strict) • Tailwind v4 • shadcn/ui • TanStack Query v5 • react‑hook‑form + zod •
-Prisma • NextAuth • UploadThing + sharp • Vercel AI SDK (OpenAI).
+Prisma • AuthJS • UploadThing + sharp • Vercel AI SDK (OpenAI).
 
 ## Konventionen
 
