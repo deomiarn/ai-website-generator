@@ -1,36 +1,41 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Relume‑Style Website Generator (Next.js)
 
-## Getting Started
+Ein Full‑Stack Website‑Generator wie relume.io: Projekte ➜ AI‑Sitemap ➜ Wireframes ➜ Varianten/Replace ➜ Design‑Tokens ➜
+Export (Next.js).
 
-First, run the development server:
+## Features
+
+- **Projects CRUD** mit Prisma + Route Handlers
+- **Sitemap Board** (Cards, Zoom/Pan, Reorder)
+- **Sections‑Library** (10–50 Varianten je Kind) + **Snapshot Thumbnails**
+- **Wireframe Canvas** (DnD, Inline‑Copy, Swap, Undo/Redo)
+- **Variant Explorer & Replace** (Copy bleibt)
+- **Favorites & AI Ranking** (OpenAI über Vercel AI SDK)
+- **Design Settings** (Fonts/Radius/Colors Tokens)
+- **Media Pipeline** (UploadThing + sharp + next/image)
+- **SEO & OG & Analyzer**
+- **AI Copy Assist** (per Page)
+- **Exporter** (Next.js Zip)
+- **Forms Module**, **Cal.com**, **E‑Commerce Starter**, **Library Admin**, **Sitemap Import**, **Figma Export (opt.)**
+
+## Tech Stack
+
+Next.js (App Router) • TypeScript (strict) • Tailwind v4 • shadcn/ui • TanStack Query v5 • react‑hook‑form + zod •
+Prisma • NextAuth • UploadThing + sharp • Vercel AI SDK (OpenAI).
+
+## Konventionen
+
+- **Paddings:**
+    - **Sections (export):** `.container-1440.pad-responsive` (420→20px, 920→40px, 1440→60px all)
+    - **App UI (Dashboard/Tool):** `.app-shell` (fluid; Gutters ≈ 16/24/32px). Sidebar 280px via `.with-sidebar`.
+- **TS:** `strict: true`, `noImplicitAny: true`; `any` nur in `catch (err: any)`.
+- **UI:** shadcn‑first; hohe Kohäsion; page‑lokale Komponenten.
+
+## Setup (Kurz)
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+pnpm i
+cp .env.example .env   # Secrets setzen
+pnpx prisma generate && pnpx prisma migrate dev
 pnpm dev
-# or
-bun dev
 ```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
