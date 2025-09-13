@@ -26,7 +26,12 @@ const serverAuthConfig: NextAuthConfig = {
           const ok = await bcrypt.compare(password, user.passwordHash);
           if (!ok) return null;
 
-          return { id: user.id, email: user.email, name: user.name ?? undefined };
+          return {
+            id: user.id,
+            email: user.email,
+            name: user.name ?? undefined,
+            image: user.image ?? undefined,
+          };
         } finally {
           await prisma.$disconnect();
         }

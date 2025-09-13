@@ -16,6 +16,11 @@ enum Role {
   ADMIN
 }
 
+enum ProjectStatus {
+  ACTIVE
+  ARCHIVED
+}
+
 // Auth.js v5 standard tables
 model Account {
   id                String  @id @default(cuid())
@@ -58,6 +63,7 @@ model User {
 
   accounts Account[]
   sessions Session[]
+  projects Project[]
 }
 
 model VerificationToken {
@@ -66,4 +72,21 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+model Project {
+  id          String        @id @default(cuid())
+  ownerId     String
+  name        String
+  description String?
+  slug        String
+  status      ProjectStatus @default(ACTIVE)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  owner User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  @@unique([ownerId, slug])
+  @@index([ownerId, status])
+  @@index([ownerId, createdAt])
 }

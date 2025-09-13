@@ -1,10 +1,13 @@
-export default function ProjectsPage() {
-  return (
-    <section className="app-shell py-6">
-      <h1 className="text-2xl font-bold">Projects</h1>
-      <p className="mt-2 text-muted-foreground">
-        Manage your website generation projects.
-      </p>
-    </section>
-  );
+import { redirect } from "next/navigation";
+import { auth } from "@/lib/auth";
+import ProjectsPageClient from "./ProjectsPageClient";
+
+export default async function ProjectsPage() {
+  const session = await auth();
+
+  if (!session?.user?.id) {
+    redirect("/login");
+  }
+
+  return <ProjectsPageClient />;
 }
