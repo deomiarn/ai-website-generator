@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import { FolderKanban, LayoutDashboard, Library, LogOut, PanelLeftClose, PanelLeftOpen, Settings, } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -36,6 +36,13 @@ const navigationItems = [
 export function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const { data: session } = useSession();
+
+  const handleSignOut = async () => {
+    await signOut({
+      callbackUrl: "/login",
+      redirect: true
+    });
+  };
 
   const toggleCollapsed = () => {
     const newCollapsed = !isCollapsed;
@@ -138,6 +145,7 @@ export function Sidebar() {
               size="sm"
               className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
               aria-label="Sign out"
+              onClick={handleSignOut}
             >
               <LogOut size={14} />
             </Button>
